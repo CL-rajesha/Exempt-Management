@@ -1,0 +1,47 @@
+.image1Icon {
+  position: relative;
+  width: 96.81px;
+  height: 66.24px;
+  object-fit: cover;
+}
+.brandNavList,
+.navList {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.navList {
+  align-items: flex-start;
+  gap: 12.75px;
+}
+.brandNavList {
+  position: absolute;
+  top: 4.25px;
+  left: 18.68px;
+  align-items: center;
+}
+.sideNav,
+.sideNavChild,
+.sideNavItem {
+  position: absolute;
+  top: 0;
+  left: 259px;
+  background-color: var(--color-gray-200);
+  width: 1180px;
+  height: 58px;
+}
+.sideNav,
+.sideNavItem {
+  top: 55px;
+  background-color: var(--color-white);
+  width: 1181px;
+  height: 54px;
+}
+.sideNav {
+  top: 0;
+  left: 0;
+  background-color: var(--color-black);
+  box-shadow: 0 7.969231128692627px 79.69px rgba(0, 0, 0, 0.15);
+  width: 259px;
+  height: 900px;
+}
