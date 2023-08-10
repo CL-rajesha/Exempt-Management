@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "antd/dist/antd.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { TextField } from "@mui/material";
@@ -38,22 +38,23 @@ import {
 import { useNavigate } from "react-router-dom";
 import FeedbackForm from "../components/FeedbackForm";
 import styles from "./Desktop3.module.css";
-import { gql, useQuery } from "@apollo/client"; // Fixed the import here
+import { gql, useQuery } from "@apollo/client";
 
-const FETCH_ALLEXEPTION = gql`
-  query getAllExemption {
-    allExemptions {
-      Action
-      EntityName
-      LicenseNumber
-      RequestDate
-      RequestID
-      Source
-      Status
-    }
+const FETCH_ALLEXEMPTION = gql`
+query getAllExemption($page: Int, $pageSize: Int, $offset: Int) {
+  allExemptions(offset: $offset, limit: $pageSize) {
+    Action
+    EntityName
+    LicenseNumber
+    RequestDate
+    RequestID
+    Source
+    Status
   }
+}
 `;
 
+const PAGE_SIZE = 1; // Number of items per page
 
 const Desktop3 = () => {
   const navigate = useNavigate();
@@ -62,13 +63,31 @@ const Desktop3 = () => {
     navigate("/frame-20");
   }, [navigate]);
 
-  const { loading, error, data } = useQuery(FETCH_ALLEXEPTION);
+  const [currentPage, setCurrentPage] = useState(1);
+  const offset = (currentPage - 1) * PAGE_SIZE;
+
+const { loading, error, data } = useQuery(FETCH_ALLEXEMPTION, {
+  variables: { page: currentPage, pageSize: PAGE_SIZE, offset: offset },
+});
 
   useEffect(() => {
     if (data) {
       console.log("Exemption Data:", data.allExemptions);
     }
   }, [data]);
+
+  const handleNextPage = () => {
+    if (data && data.allExemptions.length === PAGE_SIZE) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
 
   return (
     <div className={styles.desktop3}>
@@ -156,53 +175,78 @@ const Desktop3 = () => {
         <div className={styles.frameWrapper}>
           <div className={styles.frameGroup}>
             <div className={styles.rowParent}>
-            <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Action</th>
-            <th>Entity Name</th>
-            <th>Source</th>
-            <th>Request ID</th>
-            <th>License Number</th>
-            <th>Request Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data &&
-            data.allExemptions.map((exemption, index) => (
-              <tr  className={styles.hover}  key={index}>
-                <td>{exemption.Action}</td>
-                <td>{exemption.EntityName}</td>
-                <td>{exemption.Source}</td>
-                <td>{exemption.RequestID}</td>
-                <td>{exemption.LicenseNumber}</td>
-                <td>{exemption.RequestDate}</td>
-                <td>
-                  <div
-                    style={{
-                      color: exemption.Status === "Approved" ? "green" : "red",
-                    }}
-                  >
-                    {exemption.Status}
-                  </div>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Action</th>
+                    <th>Entity Name</th>
+                    <th>Source</th>
+                    <th>Request ID</th>
+                    <th>License Number</th>
+                    <th>Request Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data &&
+                    data.allExemptions.map((exemption, index) => (
+                      <tr className={styles.hover} key={index}>
+                        <td>{exemption.Action}</td>
+                        <td>{exemption.EntityName}</td>
+                        <td>{exemption.Source}</td>
+                        <td>{exemption.RequestID}</td>
+                        <td>{exemption.LicenseNumber}</td>
+                        <td>{exemption.RequestDate}</td>
+                        <td>
+                          <div
+                            style={{
+                              color:
+                                exemption.Status === "Approved"
+                                  ? "green"
+                                  : "red",
+                            }}
+                          >
+                            {exemption.Status}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
             <div className={styles.buttonprimaryTextParent}>
-              <AntButton type="primary" size="small" shape="round" ghost>
-                Previous
-              </AntButton>
-              <AntButton type="primary" size="small" shape="circle">
-                1
-              </AntButton>
-              <AntButton type="primary" size="small" shape="round">
-                Next
-              </AntButton>
-            </div>
+            <AntButton
+              type="primary"
+              size="small"
+              shape="round"
+              ghost
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+               Previous
+            </AntButton>
+            <AntButton
+              type="primary"
+              size="small"
+              shape="circle"
+              disabled={
+                !data || data.allExemptions.length < PAGE_SIZE
+              }
+            >
+              {currentPage}
+            </AntButton>
+            <AntButton
+              type="primary"
+              size="small"
+              shape="round"
+              onClick={handleNextPage}
+              disabled={
+                !data || data.allExemptions.length < PAGE_SIZE
+              }
+            >
+              Next  
+            </AntButton>
+          </div>
           </div>
         </div>
       </div>
